@@ -1,1 +1,7 @@
+# Sales Forecasting
 
+A simple machine learning project to predict future sales based on historical sales data.
+
+## Project Overview
+
+This project demonstrates how to build a sales forecasting model using Python and machine learning techniques. The model analyzes historical sales data and predicts future sales to support better business decisions.
