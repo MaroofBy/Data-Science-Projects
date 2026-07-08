@@ -17,7 +17,7 @@ This repository contains my data science and machine learning projects.
 ### 3. Sales Forecasting
 - LinearRegression
 - r2 score
-- mean absolute error
+- Mean absolute error
 
 ## Technologies
 - Python
