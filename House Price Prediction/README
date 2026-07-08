@@ -1,1 +1,4 @@
+# House Price Prediction
+
+A beginner-level regression project that predicts the sale price of homes in Ames, Iowa, using the **Ames Housing** dataset (the canonical Kaggle competition for tabular regression).
 
