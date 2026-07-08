@@ -15,9 +15,9 @@ This repository contains my data science and machine learning projects.
 - Model Comparison
 
 ### 3. Sales Forecasting
-- Time Series Analysis
-- Prophet
-- ARIMA
+- LinearRegression
+- r2 score
+- mean absolute error
 
 ## Technologies
 - Python
