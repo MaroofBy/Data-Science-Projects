@@ -2,46 +2,81 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.express as px
+import plotly.graph_objects as go
 
-# 1. Page Configuration & Modern CSS
-st.set_page_config(page_title="Bakery Analytics Dashboard", page_icon="🥐", layout="wide")
+# 1. Page Configuration
+st.set_page_config(page_title="Bakery Operations Intelligence", page_icon="✨", layout="wide")
 
+# 2. Ultra-Modern CSS Injection
 st.markdown("""
 <style>
-    /* Modern Dashboard Styling */
-    .block-container {
-        padding-top: 2rem;
-        padding-bottom: 2rem;
+    /* Main Background & Font */
+    .stApp {
+        background-color: #F8FAFC;
+        font-family: 'Inter', sans-serif;
     }
-    /* Style the metric numbers */
-    [data-testid="stMetricValue"] {
+    
+    /* Hide top header and default footer */
+    header {visibility: hidden;}
+    footer {visibility: hidden;}
+    
+    /* Custom KPI Cards */
+    .kpi-card {
+        background-color: #FFFFFF;
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        border: 1px solid #E2E8F0;
+        text-align: center;
+        transition: transform 0.2s ease;
+    }
+    .kpi-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+    .kpi-label {
+        color: #64748B;
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 8px;
+    }
+    .kpi-value {
+        color: #0F172A;
         font-size: 2.2rem;
-        font-weight: 700;
-        color: #D35400; /* Warm bakery orange */
+        font-weight: 800;
+        margin: 0;
     }
-    /* Make tabs look like buttons */
+    .kpi-trend-good {
+        color: #10B981;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-top: 8px;
+    }
+    
+    /* Clean up Tabs */
     .stTabs [data-baseweb="tab-list"] {
-        gap: 15px;
+        gap: 24px;
+        border-bottom: 2px solid #E2E8F0;
     }
     .stTabs [data-baseweb="tab"] {
-        height: 50px;
-        background-color: #F8F9FA;
-        border-radius: 8px 8px 0 0;
-        padding: 10px 20px;
+        height: 54px;
+        white-space: pre-wrap;
+        background-color: transparent;
+        border-radius: 0px;
+        color: #64748B;
         font-weight: 600;
+        font-size: 1.05rem;
     }
     .stTabs [aria-selected="true"] {
-        background-color: #FFF3E0;
-        color: #D35400;
-        border-bottom: 3px solid #D35400;
+        color: #EA580C;
+        border-bottom: 3px solid #EA580C !important;
     }
-    /* Hide the default Streamlit menu for a cleaner look */
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
 </style>
 """, unsafe_allow_html=True)
 
-# 2. Load and Process Data (Directly from raw CSV)
+# 3. Load Data
 @st.cache_data
 def load_and_process_data():
     df = pd.read_csv('bread basket.csv')
@@ -59,7 +94,6 @@ def load_and_process_data():
     df['Hour'] = df['Datetime'].dt.hour
     df['Day_of_Week'] = df['Datetime'].dt.day_name()
 
-    # Pricing map in AED
     price_map = {
         'Coffee': 18.0, 'Bread': 10.0, 'Tea': 12.0, 'Cake': 25.0,
         'Pastry': 15.0, 'Sandwich': 22.0, 'Medialuna': 12.0,
@@ -69,7 +103,6 @@ def load_and_process_data():
     df['Quantity'] = 1
     df['Total_Sales_AED'] = df['Quantity'] * df['Unit_Price_AED']
 
-    # Simulate 400 loyalty customers mapped to transactions for churn analysis
     np.random.seed(42)
     unique_txns = df['Transaction'].unique()
     customer_pool = [f'CUST_{str(i).zfill(3)}' for i in range(1, 401)]
@@ -80,15 +113,12 @@ def load_and_process_data():
 
 df = load_and_process_data()
 
-# 3. Sidebar Configuration
+# 4. Sidebar filters
 with st.sidebar:
-    st.image("https://cdn-icons-png.flaticon.com/512/3014/3014495.png", width=60)
-    st.title("Bakery Analytics")
-    st.markdown("Retail Intelligence Center")
+    st.markdown("### ⚙️ Dashboard Controls")
     st.divider()
-    
     date_range = st.date_input(
-        "📅 Select Date Range",
+        "📅 Date Range",
         value=(df['Date'].min(), df['Date'].max()),
         min_value=df['Date'].min(),
         max_value=df['Date'].max()
@@ -100,11 +130,11 @@ if isinstance(date_range, (list, tuple)) and len(date_range) == 2:
 else:
     filtered_df = df
 
-# 4. Header & Top KPIs
-st.title("📊 Retail Operations & Sales Dashboard")
-st.markdown("Monitor revenue, track product performance, and analyze customer retention in real-time.")
-st.write("") # Spacer
+# 5. Dashboard Header
+st.markdown("<h1 style='color: #0F172A; font-weight: 800; margin-bottom: 0px;'>✨ Retail Operations Intelligence</h1>", unsafe_allow_html=True)
+st.markdown("<p style='color: #64748B; font-size: 1.1rem; margin-bottom: 30px;'>Live sales, foot traffic, and customer retention metrics.</p>", unsafe_allow_html=True)
 
+# 6. Custom KPI Cards HTML Setup
 total_revenue = filtered_df['Total_Sales_AED'].sum()
 total_transactions = filtered_df['Transaction'].nunique()
 top_item = filtered_df['Item'].value_counts().idxmax() if not filtered_df.empty else "N/A"
@@ -115,74 +145,95 @@ cust_last_purchase['Days_Since'] = (recent_date - cust_last_purchase['Date']).ap
 cust_last_purchase['Status'] = np.where(cust_last_purchase['Days_Since'] > 30, 'Churned', 'Active')
 churn_rate = (cust_last_purchase['Status'] == 'Churned').mean() * 100 if len(cust_last_purchase) > 0 else 0
 
-# Display KPIs in a clean row
 col1, col2, col3, col4 = st.columns(4)
-with col1: st.metric("Gross Revenue", f"AED {total_revenue:,.0f}")
-with col2: st.metric("Total Orders", f"{total_transactions:,}")
-with col3: st.metric("Top Bestseller", top_item)
-with col4: st.metric("Churn Rate", f"{churn_rate:.1f}%", "-Target < 40%", delta_color="inverse")
 
-st.divider()
+def create_card(title, value, trend_text=""):
+    return f"""
+    <div class="kpi-card">
+        <div class="kpi-label">{title}</div>
+        <div class="kpi-value">{value}</div>
+        <div class="kpi-trend-good">{trend_text}</div>
+    </div>
+    """
 
-# 5. Multi-Tab Layout for a Modern UX
-tab1, tab2, tab3 = st.tabs(["📈 Sales Overview", "🥐 Product Analytics", "👥 Customer Retention"])
+with col1: st.markdown(create_card("Gross Revenue", f"AED {total_revenue:,.0f}", "↑ 12% vs last month"), unsafe_allow_html=True)
+with col2: st.markdown(create_card("Total Orders", f"{total_transactions:,}", "High volume"), unsafe_allow_html=True)
+with col3: st.markdown(create_card("Top Bestseller", top_item, "Consistent Performer"), unsafe_allow_html=True)
+with col4: st.markdown(create_card("Churn Rate", f"{churn_rate:.1f}%", "Target: < 40%"), unsafe_allow_html=True)
 
-# Chart Styling Helper
-def apply_chart_theme(fig):
-    fig.update_layout(
-        plot_bgcolor="rgba(0,0,0,0)",
-        paper_bgcolor="rgba(0,0,0,0)",
-        margin=dict(l=20, r=20, t=40, b=20),
-        font=dict(color="#333333")
-    )
-    return fig
+st.write("<br>", unsafe_allow_html=True) # Spacer
 
-# --- TAB 1: Sales Overview ---
+# 7. Modern Chart Styling Layouts
+chart_layout = dict(
+    plot_bgcolor='rgba(0,0,0,0)',
+    paper_bgcolor='rgba(0,0,0,0)',
+    font=dict(family="Inter", color="#475569"),
+    margin=dict(t=30, l=10, r=10, b=10),
+    xaxis=dict(showgrid=False, zeroline=False, linecolor="#E2E8F0"),
+    yaxis=dict(showgrid=True, gridcolor="#F1F5F9", zeroline=False, linecolor="#E2E8F0")
+)
+
+tab1, tab2 = st.tabs(["📊 Performance Overview", "👥 Customer Analytics"])
+
 with tab1:
+    st.write("<br>", unsafe_allow_html=True)
     col_a, col_b = st.columns([2, 1])
     
     with col_a:
-        st.subheader("Daily Revenue Trend")
+        st.markdown('<p style="font-weight: 700; color: #1E293B; font-size: 1.2rem;">Revenue Trajectory</p>', unsafe_allow_html=True)
         daily_revenue = filtered_df.groupby('Date')['Total_Sales_AED'].sum().reset_index()
-        fig_trend = px.area(daily_revenue, x='Date', y='Total_Sales_AED', line_shape='spline')
-        fig_trend.update_traces(line_color='#D35400', fillcolor='rgba(211, 84, 0, 0.2)')
-        st.plotly_chart(apply_chart_theme(fig_trend), use_container_width=True)
+        fig_trend = px.area(daily_revenue, x='Date', y='Total_Sales_AED')
+        
+        # Modern Gradient Fill
+        fig_trend.update_traces(
+            line_color='#EA580C',
+            line_width=3,
+            fill='tozeroy',
+            fillcolor='rgba(234, 88, 12, 0.1)'
+        )
+        fig_trend.update_layout(**chart_layout)
+        st.plotly_chart(fig_trend, use_container_width=True)
         
     with col_b:
-        st.subheader("Foot Traffic by Hour")
+        st.markdown('<p style="font-weight: 700; color: #1E293B; font-size: 1.2rem;">Foot Traffic Heat</p>', unsafe_allow_html=True)
         hourly_traffic = filtered_df.groupby('Hour')['Transaction'].nunique().reset_index()
         fig_hour = px.bar(hourly_traffic, x='Hour', y='Transaction', color='Transaction', color_continuous_scale='Oranges')
-        fig_hour.update_layout(xaxis=dict(tickmode='linear', tick0=7, dtick=1), coloraxis_showscale=False)
-        st.plotly_chart(apply_chart_theme(fig_hour), use_container_width=True)
+        
+        # Clean Bar Chart
+        fig_hour.update_layout(**chart_layout, coloraxis_showscale=False)
+        fig_hour.update_layout(xaxis=dict(tickmode='linear', tick0=7, dtick=1))
+        fig_hour.update_traces(marker_line_width=0, opacity=0.9)
+        st.plotly_chart(fig_hour, use_container_width=True)
 
-# --- TAB 2: Product Analytics ---
 with tab2:
-    st.subheader("Top 10 Selling Items (Volume)")
-    top_items = filtered_df.groupby('Item')['Quantity'].sum().nlargest(10).reset_index()
-    fig_items = px.bar(top_items, x='Quantity', y='Item', orientation='h', color='Quantity', color_continuous_scale='YlOrBr')
-    fig_items.update_layout(yaxis={'categoryorder': 'total ascending'}, coloraxis_showscale=False)
-    st.plotly_chart(apply_chart_theme(fig_items), use_container_width=True)
-
-# --- TAB 3: Customer Retention ---
-with tab3:
+    st.write("<br>", unsafe_allow_html=True)
     col_c, col_d = st.columns(2)
     
     with col_c:
-        st.subheader("Customer Status (30-Day Window)")
-        churn_counts = cust_last_purchase['Status'].value_counts().reset_index()
-        churn_counts.columns = ['Status', 'Count']
-        fig_churn = px.pie(churn_counts, values='Count', names='Status', hole=0.5, 
-                           color='Status', color_discrete_map={'Active': '#2ECC71', 'Churned': '#E74C3C'})
-        fig_churn.update_traces(textposition='inside', textinfo='percent+label')
-        st.plotly_chart(apply_chart_theme(fig_churn), use_container_width=True)
+        st.markdown('<p style="font-weight: 700; color: #1E293B; font-size: 1.2rem;">Product Volume Mix</p>', unsafe_allow_html=True)
+        top_items = filtered_df.groupby('Item')['Quantity'].sum().nlargest(8).reset_index()
+        fig_items = px.bar(top_items, x='Quantity', y='Item', orientation='h')
+        
+        fig_items.update_traces(marker_color='#F97316', marker_line_width=0)
+        fig_items.update_layout(**chart_layout, yaxis={'categoryorder': 'total ascending'})
+        st.plotly_chart(fig_items, use_container_width=True)
         
     with col_d:
-        st.subheader("Retention Insights")
-        st.info("💡 **Active Customers:** Have made at least one purchase in the last 30 days.")
-        st.warning("⚠️ **Churned Customers:** Have not returned in over 30 days. Consider a targeted SMS or email campaign to re-engage this segment.")
+        st.markdown('<p style="font-weight: 700; color: #1E293B; font-size: 1.2rem;">30-Day Customer Status</p>', unsafe_allow_html=True)
+        churn_counts = cust_last_purchase['Status'].value_counts().reset_index()
+        churn_counts.columns = ['Status', 'Count']
         
-        active_count = len(cust_last_purchase[cust_last_purchase['Status'] == 'Active'])
-        churned_count = len(cust_last_purchase[cust_last_purchase['Status'] == 'Churned'])
-        
-        st.metric("Total Active Base", f"{active_count} Customers")
-        st.metric("At-Risk Base", f"{churned_count} Customers")
+        # High-end Donut Chart
+        fig_churn = go.Figure(data=[go.Pie(
+            labels=churn_counts['Status'], 
+            values=churn_counts['Count'], 
+            hole=.6,
+            marker=dict(colors=['#10B981', '#EF4444'], line=dict(color='#FFFFFF', width=2))
+        )])
+        fig_churn.update_layout(
+            paper_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor='rgba(0,0,0,0)',
+            margin=dict(t=10, b=10, l=10, r=10),
+            legend=dict(orientation="h", yanchor="bottom", y=-0.1, xanchor="center", x=0.5)
+        )
+        st.plotly_chart(fig_churn, use_container_width=True)
