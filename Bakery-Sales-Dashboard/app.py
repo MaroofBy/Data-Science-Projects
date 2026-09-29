@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
+from datetime import timedelta
 
 # 1. Page Configuration
 st.set_page_config(page_title="Bakery Operations Intelligence", page_icon="✨", layout="wide")
@@ -10,17 +11,12 @@ st.set_page_config(page_title="Bakery Operations Intelligence", page_icon="✨",
 # 2. Ultra-Modern CSS Injection
 st.markdown("""
 <style>
-    /* Main Background & Font */
     .stApp {
         background-color: #F8FAFC;
         font-family: 'Inter', sans-serif;
     }
-    
-    /* Hide top header and default footer */
     header {visibility: hidden;}
     footer {visibility: hidden;}
-    
-    /* Custom KPI Cards */
     .kpi-card {
         background-color: #FFFFFF;
         border-radius: 16px;
@@ -54,8 +50,6 @@ st.markdown("""
         font-weight: 600;
         margin-top: 8px;
     }
-    
-    /* Clean up Tabs */
     .stTabs [data-baseweb="tab-list"] {
         gap: 24px;
         border-bottom: 2px solid #E2E8F0;
@@ -76,7 +70,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# 3. Load Data
+# 3. Load Data & Time-Shift to Current Year
 @st.cache_data
 def load_and_process_data():
     df = pd.read_csv('bread basket.csv')
@@ -89,6 +83,10 @@ def load_and_process_data():
     else:
         date_col = [c for c in df.columns if 'date' in c.lower()][0]
         df['Datetime'] = pd.to_datetime(df[date_col])
+
+    # TIME SHIFT TRICK: Shift all historical dates to end on today's date
+    time_difference = pd.Timestamp.now().normalize() - df['Datetime'].max().normalize()
+    df['Datetime'] = df['Datetime'] + time_difference
 
     df['Date'] = df['Datetime'].dt.date
     df['Hour'] = df['Datetime'].dt.hour
@@ -117,11 +115,16 @@ df = load_and_process_data()
 with st.sidebar:
     st.markdown("### ⚙️ Dashboard Controls")
     st.divider()
+    
+    # Set default view to the last 30 days of data for a better initial look
+    max_date = df['Date'].max()
+    min_date_default = max_date - timedelta(days=30)
+    
     date_range = st.date_input(
         "📅 Date Range",
-        value=(df['Date'].min(), df['Date'].max()),
+        value=(min_date_default, max_date),
         min_value=df['Date'].min(),
-        max_value=df['Date'].max()
+        max_value=max_date
     )
 
 if isinstance(date_range, (list, tuple)) and len(date_range) == 2:
