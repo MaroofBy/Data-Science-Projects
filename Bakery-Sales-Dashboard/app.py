@@ -6,7 +6,7 @@ import plotly.graph_objects as go
 from datetime import timedelta
 
 # 1. Page Configuration
-st.set_page_config(page_title="Bakery Operations Intelligence", page_icon="✨", layout="wide")
+st.set_page_config(page_title="Bakery Operations Intelligence", layout="wide")
 
 # 2. Ultra-Modern CSS Injection
 st.markdown("""
