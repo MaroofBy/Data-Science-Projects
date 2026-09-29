@@ -161,7 +161,7 @@ with col2: st.markdown(create_card("Total Orders", f"{total_transactions:,}", "H
 with col3: st.markdown(create_card("Top Bestseller", top_item, "Consistent Performer"), unsafe_allow_html=True)
 with col4: st.markdown(create_card("Churn Rate", f"{churn_rate:.1f}%", "Target: < 40%"), unsafe_allow_html=True)
 
-st.write("<br>", unsafe_allow_html=True) # Spacer
+st.write("<br>", unsafe_allow_html=True)
 
 # 7. Modern Chart Styling Layouts
 chart_layout = dict(
@@ -184,7 +184,6 @@ with tab1:
         daily_revenue = filtered_df.groupby('Date')['Total_Sales_AED'].sum().reset_index()
         fig_trend = px.area(daily_revenue, x='Date', y='Total_Sales_AED')
         
-        # Modern Gradient Fill
         fig_trend.update_traces(
             line_color='#EA580C',
             line_width=3,
@@ -199,9 +198,9 @@ with tab1:
         hourly_traffic = filtered_df.groupby('Hour')['Transaction'].nunique().reset_index()
         fig_hour = px.bar(hourly_traffic, x='Hour', y='Transaction', color='Transaction', color_continuous_scale='Oranges')
         
-        # Clean Bar Chart
-        fig_hour.update_layout(**chart_layout, coloraxis_showscale=False)
-        fig_hour.update_layout(xaxis=dict(tickmode='linear', tick0=7, dtick=1))
+        fig_hour.update_layout(**chart_layout)
+        fig_hour.update_coloraxes(showscale=False)
+        fig_hour.update_xaxes(tickmode='linear', tick0=7, dtick=1)
         fig_hour.update_traces(marker_line_width=0, opacity=0.9)
         st.plotly_chart(fig_hour, use_container_width=True)
 
@@ -215,7 +214,8 @@ with tab2:
         fig_items = px.bar(top_items, x='Quantity', y='Item', orientation='h')
         
         fig_items.update_traces(marker_color='#F97316', marker_line_width=0)
-        fig_items.update_layout(**chart_layout, yaxis={'categoryorder': 'total ascending'})
+        fig_items.update_layout(**chart_layout)
+        fig_items.update_yaxes(categoryorder='total ascending')
         st.plotly_chart(fig_items, use_container_width=True)
         
     with col_d:
@@ -223,7 +223,6 @@ with tab2:
         churn_counts = cust_last_purchase['Status'].value_counts().reset_index()
         churn_counts.columns = ['Status', 'Count']
         
-        # High-end Donut Chart
         fig_churn = go.Figure(data=[go.Pie(
             labels=churn_counts['Status'], 
             values=churn_counts['Count'], 
