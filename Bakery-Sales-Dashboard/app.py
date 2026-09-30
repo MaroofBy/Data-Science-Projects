@@ -15,7 +15,6 @@ st.markdown("""
         background-color: #F8FAFC;
         font-family: 'Inter', sans-serif;
     }
-    header {visibility: hidden;}
     footer {visibility: hidden;}
     .kpi-card {
         background-color: #FFFFFF;
