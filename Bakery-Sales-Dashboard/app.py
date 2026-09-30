@@ -134,7 +134,7 @@ else:
     filtered_df = df
 
 # 5. Dashboard Header
-st.markdown("<h1 style='color: #0F172A; font-weight: 800; margin-bottom: 0px;'>✨ Retail Operations Intelligence</h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='color: #0F172A; font-weight: 800; margin-bottom: 0px;'>Bakery Sales & Customer Churn Analytics</h1>", unsafe_allow_html=True)
 st.markdown("<p style='color: #64748B; font-size: 1.1rem; margin-bottom: 30px;'>Live sales, foot traffic, and customer retention metrics.</p>", unsafe_allow_html=True)
 
 # 6. Custom KPI Cards HTML Setup
