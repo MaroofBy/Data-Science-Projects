@@ -28,7 +28,7 @@ This repository contains my data science and machine learning projects, covering
 - Interactive Dashboard
 - Job Market Insights
 
-  ### 5. Bakery Sales Dashboard
+### 5. Bakery Sales Dashboard
 - Sales Data Analysis
 - Data Visualization
 - Interactive Dashboard
