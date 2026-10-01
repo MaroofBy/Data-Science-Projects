@@ -1,28 +1,39 @@
-# Data-Science-Projects
-This repository contains my data science and machine learning projects.
+# Data Science Projects
+
+This repository contains my data science and machine learning projects, covering data analysis, predictive modeling, and dashboard development.
 
 ## Projects
 
 ### 1. Customer Churn Prediction
-- Logistic Regression
-- Data Cleaning
+- Data Cleaning & Preprocessing
 - Feature Engineering
+- Logistic Regression
 - Model Evaluation
 
 ### 2. House Price Prediction
-- Linear Regression
+- Data Preprocessing
 - Feature Scaling
+- Linear Regression
 - Model Comparison
 
 ### 3. Sales Forecasting
-- LinearRegression
-- r2 score
-- Mean absolute error
+- Data Analysis & Preprocessing
+- Linear Regression
+- R² Score
+- Mean Absolute Error (MAE)
+
+### 4. Data Jobs Dashboard
+- Data Cleaning & Analysis
+- Data Visualization
+- Interactive Dashboard
+- Job Market Insights
 
 ## Technologies
+
 - Python
 - Pandas
 - NumPy
 - Scikit-learn
 - Matplotlib
 - Seaborn
+- Data Visualization
