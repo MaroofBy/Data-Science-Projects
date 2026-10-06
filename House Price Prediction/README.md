@@ -2,7 +2,7 @@
 
 An end-to-end machine learning project that predicts the sale price of homes in Ames, Iowa, from the **Ames Housing** dataset (the classic Kaggle regression problem). It covers exploratory analysis, data cleaning, model comparison and tuning, and a **live web app** where you can describe a house and get an instant estimate.
 
-🔗 **Live demo:** `https://YOUR-APP-NAME.onrender.com` <!-- replace after deploying -->
+🔗 **Live demo:** `[https://YOUR-APP-NAME.onrender.com](https://data-science-projects-1-bwqv.onrender.com/)` <!-- replace after deploying -->
 
 > The free Render tier sleeps when idle, so the first visit may take about 30 seconds to wake up.
 
