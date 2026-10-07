@@ -2,8 +2,7 @@
 
 An end-to-end machine learning project that turns historical order data into a **monthly sales forecast**, served through a modern, interactive web dashboard built with **Flask**, **scikit-learn**, and **Chart.js**.
 
-**Live demo:** `https://<your-service-name>.onrender.com` *(add your Render URL after deploying)*
-
+**Live demo:** https://sales-forecasting-bi5c.onrender.com
 ---
 
 ## ✨ Features
