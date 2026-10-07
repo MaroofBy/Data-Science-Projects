@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sales Forecasting Dashboard</title>
+<meta name="description" content="Interactive sales forecasting dashboard built with Flask and scikit-learn.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📈</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg: #0a0f1f;
+  --bg-grad: radial-gradient(1200px 600px at 10% -10%, rgba(108,140,255,.18), transparent 60%),
+             radial-gradient(900px 500px at 100% 0%, rgba(34,211,238,.12), transparent 60%);
+  --panel: rgba(20, 27, 54, .78);
+  --panel-solid: #141b36;
+  --border: rgba(255,255,255,.08);
+  --text: #e8ecf8;
+  --muted: #8b95b8;
+  --accent: #6c8cff;
+  --accent-2: #22d3ee;
+  --amber: #fbbf24;
+  --good: #34d399;
+  --bad: #f87171;
+  --grid: rgba(255,255,255,.06);
+  --shadow: 0 10px 30px rgba(0,0,0,.35);
+  --radius: 18px;
+}
+[data-theme="light"] {
+  --bg: #f3f5fb;
+  --bg-grad: radial-gradient(1200px 600px at 10% -10%, rgba(108,140,255,.16), transparent 60%),
+             radial-gradient(900px 500px at 100% 0%, rgba(34,211,238,.12), transparent 60%);
+  --panel: rgba(255,255,255,.9);
+  --panel-solid: #ffffff;
+  --border: rgba(15,23,42,.08);
+  --text: #0f172a;
+  --muted: #64718f;
+  --accent: #4f6ef7;
+  --accent-2: #0891b2;
+  --amber: #d97706;
+  --grid: rgba(15,23,42,.07);
+  --shadow: 0 10px 30px rgba(15,23,42,.08);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg); background-image: var(--bg-grad); background-attachment: fixed;
+  color: var(--text); min-height: 100vh; line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+.container { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
+
+/* ---------- top bar ---------- */
+.topbar {
+  position: sticky; top: 0; z-index: 20;
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  background: color-mix(in srgb, var(--bg) 70%, transparent);
+  border-bottom: 1px solid var(--border);
+}
+.topbar .container { display: flex; align-items: center; justify-content: space-between; height: 68px; }
+.brand { display: flex; align-items: center; gap: 12px; }
+.logo {
+  width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #fff;
+  box-shadow: 0 6px 18px rgba(108,140,255,.45);
+}
+.brand h1 { font-size: 17px; font-weight: 700; letter-spacing: -.01em; }
+.brand p { font-size: 12px; color: var(--muted); }
+.top-actions { display: flex; align-items: center; gap: 10px; }
+.pill {
+  font-size: 12px; color: var(--muted); border: 1px solid var(--border);
+  padding: 6px 12px; border-radius: 999px; background: var(--panel);
+}
+.icon-btn {
+  width: 40px; height: 40px; border-radius: 12px; border: 1px solid var(--border);
+  background: var(--panel); color: var(--text); cursor: pointer; display: grid; place-items: center;
+  transition: transform .15s, border-color .15s;
+}
+.icon-btn:hover { transform: translateY(-1px); border-color: var(--accent); }
+
+/* ---------- layout ---------- */
+main { padding: 28px 0 56px; }
+.card {
+  background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius);
+  box-shadow: var(--shadow); padding: 20px; backdrop-filter: blur(10px);
+}
+.card h2 { font-size: 15px; font-weight: 650; letter-spacing: -.01em; }
+.card .sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.card-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+
+.controls { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; align-items: end; margin-bottom: 22px; }
+.field label { display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-bottom: 8px; }
+.field label b { color: var(--accent-2); font-weight: 700; }
+select {
+  width: 100%; appearance: none; -webkit-appearance: none; cursor: pointer;
+  background: var(--panel-solid) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%238b95b8' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 14px center;
+  color: var(--text); border: 1px solid var(--border); border-radius: 12px;
+  padding: 11px 38px 11px 14px; font: inherit; font-size: 14px; transition: border-color .15s, box-shadow .15s;
+}
+select:hover, select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent); }
+input[type=range] { width: 100%; accent-color: var(--accent); height: 40px; cursor: pointer; }
+
+.kpis { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 22px; }
+.kpi { position: relative; overflow: hidden; padding: 18px; }
+.kpi::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 3px; background: linear-gradient(90deg, var(--accent), var(--accent-2)); opacity: .9; }
+.kpi .label { font-size: 12px; color: var(--muted); font-weight: 500; display: flex; align-items: center; gap: 8px; }
+.kpi .value { font-size: 26px; font-weight: 750; letter-spacing: -.02em; margin: 8px 0 6px; }
+.kpi .delta { font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 999px; }
+.kpi .delta.up   { color: var(--good); background: color-mix(in srgb, var(--good) 14%, transparent); }
+.kpi .delta.down { color: var(--bad);  background: color-mix(in srgb, var(--bad) 14%, transparent); }
+.kpi .delta.flat { color: var(--muted); background: var(--grid); }
+.kpi .note { font-size: 12px; color: var(--muted); }
+
+.grid-main { display: grid; grid-template-columns: 1fr; gap: 18px; margin-bottom: 18px; }
+.grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; margin-bottom: 18px; }
+.grid-3 { display: grid; grid-template-columns: 1.3fr 1fr; gap: 18px; margin-bottom: 18px; }
+.chart-box { position: relative; height: 340px; }
+.chart-box.sm { height: 260px; }
+.legend-note { display: flex; gap: 16px; flex-wrap: wrap; font-size: 12px; color: var(--muted); }
+.legend-note span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; background: var(--c); }
+
+.badge { font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 999px; color: var(--accent-2); background: color-mix(in srgb, var(--accent-2) 14%, transparent); }
+
+/* ---------- tables ---------- */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); font-weight: 600; padding: 10px 12px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+td { padding: 12px; border-bottom: 1px solid var(--border); white-space: nowrap; font-variant-numeric: tabular-nums; }
+tr:last-child td { border-bottom: none; }
+tr.selected td { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+tr.selected td:first-child { border-radius: 10px 0 0 10px; }
+tr.selected td:last-child { border-radius: 0 10px 10px 0; }
+td .tag { font-size: 10.5px; font-weight: 700; padding: 2px 8px; border-radius: 999px; margin-left: 8px; }
+.tag.best { color: var(--good); background: color-mix(in srgb, var(--good) 15%, transparent); }
+.tag.base { color: var(--muted); background: var(--grid); }
+.tag.sel { color: var(--accent); background: color-mix(in srgb, var(--accent) 16%, transparent); }
+.btn {
+  font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; color: #fff; border: none;
+  padding: 9px 16px; border-radius: 10px; background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  box-shadow: 0 6px 16px rgba(108,140,255,.35); transition: transform .15s, filter .15s;
+}
+.btn:hover { transform: translateY(-1px); filter: brightness(1.08); }
+.scroll-y { max-height: 330px; overflow-y: auto; }
+
+.insights { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 4px; }
+.insight { font-size: 13px; color: var(--muted); background: var(--grid); padding: 8px 12px; border-radius: 10px; }
+.insight b { color: var(--text); }
+
+/* ---------- states ---------- */
+.loading .card { opacity: .55; transition: opacity .2s; }
+.toast {
+  display: none; margin-bottom: 18px; padding: 14px 18px; border-radius: 14px; font-size: 14px;
+  color: var(--bad); background: color-mix(in srgb, var(--bad) 12%, transparent); border: 1px solid color-mix(in srgb, var(--bad) 35%, transparent);
+}
+.toast.show { display: block; }
+footer { text-align: center; color: var(--muted); font-size: 12.5px; padding: 8px 0 36px; }
+footer a { color: var(--accent-2); text-decoration: none; }
+
+@media (max-width: 1100px) {
+  .kpis { grid-template-columns: repeat(3, 1fr); }
+  .controls { grid-template-columns: repeat(2, 1fr); }
+  .grid-3 { grid-template-columns: 1fr; }
+}
+@media (max-width: 720px) {
+  .container { padding: 0 16px; }
+  .kpis { grid-template-columns: repeat(2, 1fr); }
+  .grid-2 { grid-template-columns: 1fr; }
+  .controls { grid-template-columns: 1fr; }
+  .pill { display: none; }
+  .kpi .value { font-size: 22px; }
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="container">
+    <div class="brand">
+      <div class="logo">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/></svg>
+      </div>
+      <div>
+        <h1>Sales Forecasting</h1>
+        <p>Machine-learning demand outlook</p>
+      </div>
+    </div>
+    <div class="top-actions">
+      <span class="pill">{{ "{:,}".format(n_rows) }} orders analysed</span>
+      <button class="icon-btn" id="themeBtn" aria-label="Toggle theme" title="Toggle theme">
+        <svg id="themeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main id="app">
+  <div class="container">
+
+    <section class="card controls">
+      <div class="field">
+        <label for="region">Region</label>
+        <select id="region">
+          <option value="All">All regions</option>
+          {% for r in regions %}<option value="{{ r }}">{{ r }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="field">
+        <label for="segment">Customer segment</label>
+        <select id="segment">
+          <option value="All">All segments</option>
+          {% for s in segments %}<option value="{{ s }}">{{ s }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="field">
+        <label for="model">Forecast model</label>
+        <select id="model">
+          <option value="auto">Auto (best on hold-out)</option>
+          {% for m in models %}<option value="{{ m }}">{{ m }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="field">
+        <label for="horizon">Horizon: <b id="horizonVal">6</b> months</label>
+        <input type="range" id="horizon" min="1" max="{{ max_horizon }}" value="6">
+      </div>
+    </section>
+
+    <div class="toast" id="toast"></div>
+
+    <section class="kpis" id="kpis"></section>
+
+    <section class="grid-main">
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <h2>Monthly sales &amp; forecast</h2>
+            <p class="sub" id="mainSub">Loading…</p>
+          </div>
+          <div class="legend-note">
+            <span style="--c: var(--accent)">Actual</span>
+            <span style="--c: var(--amber)">Back-test (last 12 months)</span>
+            <span style="--c: var(--accent-2)">Forecast</span>
+          </div>
+        </div>
+        <div class="chart-box"><canvas id="mainChart"></canvas></div>
+        <div class="insights" id="insights"></div>
+      </div>
+    </section>
+
+    <section class="grid-2">
+      <div class="card">
+        <div class="card-head"><div><h2>Seasonality</h2><p class="sub">Average sales by calendar month</p></div></div>
+        <div class="chart-box sm"><canvas id="seasonChart"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div><h2>Yearly sales &amp; profit</h2><p class="sub">Annual performance</p></div></div>
+        <div class="chart-box sm"><canvas id="yearChart"></canvas></div>
+      </div>
+    </section>
+
+    <section class="grid-2">
+      <div class="card">
+        <div class="card-head"><div><h2>Sales by region</h2><p class="sub">Share of total revenue</p></div></div>
+        <div class="chart-box sm"><canvas id="regionChart"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div><h2>Sales by sub-category</h2><p class="sub">Total revenue</p></div></div>
+        <div class="chart-box sm"><canvas id="subChart"></canvas></div>
+      </div>
+    </section>
+
+    <section class="grid-3">
+      <div class="card">
+        <div class="card-head">
+          <div><h2>Model comparison</h2><p class="sub">Evaluated on the most recent 12 months (time-based hold-out)</p></div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Model</th><th>MAE</th><th>RMSE</th><th>MAPE</th><th>R²</th></tr></thead>
+            <tbody id="metricsBody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head">
+          <div><h2>Forecast table</h2><p class="sub">With approx. 95% range</p></div>
+          <button class="btn" id="csvBtn">Download CSV</button>
+        </div>
+        <div class="table-wrap scroll-y">
+          <table>
+            <thead><tr><th>Month</th><th>Forecast</th><th>Low</th><th>High</th></tr></thead>
+            <tbody id="forecastBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      Built with Flask, scikit-learn &amp; Chart.js ·
+      <a href="https://github.com/MaroofBy" target="_blank" rel="noopener">@MaroofBy</a>
+    </footer>
+  </div>
+</main>
+
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const fmtMoney = (v, d = 0) => v == null ? '–' : '$' + Number(v).toLocaleString('en-US', { maximumFractionDigits: d });
+  const fmtCompact = (v) => v == null ? '–' : '$' + Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 1 }).format(v);
+  const monthLabel = (s) => { const [y, m] = s.split('-'); return new Date(+y, +m - 1, 1).toLocaleString('en-US', { month: 'short', year: 'numeric' }); };
+  const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  const withAlpha = (hex, a) => {
+    const h = hex.replace('#', '');
+    const n = parseInt(h.length === 3 ? h.split('').map(c => c + c).join('') : h, 16);
+    return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${a})`;
+  };
+
+  let data = null;
+  const charts = {};
+  let reqId = 0;
+
+  /* ---------------- theme ---------------- */
+  const icons = {
+    dark: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+    light: '<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>'
+  };
+  function setTheme(t) {
+    document.documentElement.setAttribute('data-theme', t);
+    $('themeIcon').innerHTML = icons[t];
+    try { localStorage.setItem('theme', t); } catch (e) {}
+    if (data) renderCharts();
+  }
+  $('themeBtn').addEventListener('click', () => {
+    setTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+  });
+  let saved = null;
+  try { saved = localStorage.getItem('theme'); } catch (e) {}
+  if (!saved && window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) saved = 'light';
+  setTheme(saved || 'dark');
+
+  /* ---------------- chart helpers ---------------- */
+  function baseOptions() {
+    const text = css('--muted'), grid = css('--grid');
+    return {
+      responsive: true, maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: css('--panel-solid'), titleColor: css('--text'), bodyColor: css('--text'),
+          borderColor: css('--border'), borderWidth: 1, padding: 12, cornerRadius: 10,
+          callbacks: { label: (c) => c.parsed.y == null ? null : ` ${c.dataset.label}: ${fmtMoney(c.parsed.y)}` }
+        }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { color: text, maxRotation: 0, autoSkip: true, maxTicksLimit: 12 }, border: { display: false } },
+        y: { grid: { color: grid }, ticks: { color: text, callback: (v) => fmtCompact(v) }, border: { display: false }, beginAtZero: true }
+      }
+    };
+  }
+  function upsert(key, canvasId, config) {
+    if (charts[key]) charts[key].destroy();
+    charts[key] = new Chart($(canvasId), config);
+  }
+
+  /* ---------------- rendering ---------------- */
+  function renderKpis() {
+    const k = data.kpis, h = data.filters.horizon;
+    const delta = (v, suffix = '') => {
+      if (v == null) return '<span class="delta flat">n/a</span>';
+      const cls = v > 0.05 ? 'up' : v < -0.05 ? 'down' : 'flat';
+      const arrow = v > 0.05 ? '▲' : v < -0.05 ? '▼' : '•';
+      return `<span class="delta ${cls}">${arrow} ${Math.abs(v).toFixed(1)}%${suffix}</span>`;
+    };
+    const cards = [
+      { label: 'Total sales', value: fmtMoney(k.total_sales), foot: delta(k.yoy, ' YoY') },
+      { label: 'Total profit', value: fmtMoney(k.total_profit), foot: `<span class="note">${k.profit_margin.toFixed(1)}% margin</span>` },
+      { label: 'Orders', value: k.orders.toLocaleString(), foot: `<span class="note">Avg ${fmtMoney(k.avg_monthly)} / month</span>` },
+      { label: `Forecast · next ${h} mo`, value: fmtMoney(k.forecast_total), foot: delta(k.forecast_vs_last, ' vs last yr') },
+      { label: 'Selected model', value: data.selected_model.replace(' Regression', ' Reg.'), foot: `<span class="note">${data.selected_model === data.best_model ? 'Best on hold-out' : 'Best: ' + data.best_model}</span>`, small: true }
+    ];
+    $('kpis').innerHTML = cards.map(c => `
+      <div class="card kpi">
+        <div class="label">${c.label}</div>
+        <div class="value" ${c.small ? 'style="font-size:20px;margin:12px 0 10px"' : ''}>${c.value}</div>
+        ${c.foot}
+      </div>`).join('');
+  }
+
+  function renderMain() {
+    const hist = data.history, bt = data.backtest, fc = data.forecast;
+    const labels = [...hist.labels, ...fc.labels];
+    const nh = hist.labels.length, nf = fc.labels.length;
+    const pad = (arr, before, after) => [...Array(before).fill(null), ...arr, ...Array(after).fill(null)];
+    const lastActual = hist.sales[nh - 1];
+
+    const actual = pad(hist.sales, 0, nf);
+    const backtest = pad(bt.values, nh - bt.values.length, nf);
+    const fcLine = pad([lastActual, ...fc.values], nh - 1, 0);
+    const lower  = pad([lastActual, ...fc.lower], nh - 1, 0);
+    const upper  = pad([lastActual, ...fc.upper], nh - 1, 0);
+
+    const accent = css('--accent'), cyan = css('--accent-2'), amber = css('--amber');
+    const opts = baseOptions();
+    opts.scales.x.ticks.callback = function (v) { return monthLabel(labels[v]); };
+    opts.plugins.tooltip.callbacks.title = (items) => monthLabel(labels[items[0].dataIndex]);
+
+    const ctx = $('mainChart').getContext('2d');
+    const g = ctx.createLinearGradient(0, 0, 0, 340);
+    g.addColorStop(0, withAlpha(accent, .35)); g.addColorStop(1, withAlpha(accent, 0));
+
+    upsert('main', 'mainChart', {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          { label: 'Actual', data: actual, borderColor: accent, backgroundColor: g, fill: true, tension: .35, borderWidth: 2.5, pointRadius: 0, pointHoverRadius: 5 },
+          { label: 'Back-test', data: backtest, borderColor: amber, borderDash: [6, 5], tension: .35, borderWidth: 2, pointRadius: 0, pointHoverRadius: 5 },
+          { label: 'Forecast', data: fcLine, borderColor: cyan, tension: .35, borderWidth: 2.8, pointRadius: 3, pointBackgroundColor: cyan, pointHoverRadius: 6 },
+          { label: 'Lower', data: lower, borderColor: 'transparent', pointRadius: 0, pointHoverRadius: 0, fill: false, tension: .35 },
+          { label: 'Upper', data: upper, borderColor: 'transparent', pointRadius: 0, pointHoverRadius: 0, backgroundColor: withAlpha(cyan, .14), fill: '-1', tension: .35 }
+        ]
+      },
+      options: Object.assign(opts, {
+        plugins: Object.assign(opts.plugins, {
+          tooltip: Object.assign(opts.plugins.tooltip, {
+            filter: (item) => !['Lower', 'Upper'].includes(item.dataset.label)
+          })
+        })
+      })
+    });
+
+    $('mainSub').textContent = `${monthLabel(hist.labels[0])} – ${monthLabel(hist.labels[nh - 1])} history · ${nf}-month outlook with ~95% range`;
+    const i = data.insights;
+    $('insights').innerHTML = `
+      <span class="insight">Peak month: <b>${i.peak_month}</b></span>
+      <span class="insight">Slowest month: <b>${i.low_month}</b></span>
+      <span class="insight">Model: <b>${data.selected_model}</b></span>`;
+  }
+
+  function renderSecondary() {
+    const accent = css('--accent'), cyan = css('--accent-2'), amber = css('--amber');
+    const palette = [accent, cyan, amber, '#a78bfa', '#34d399'];
+
+    const seas = data.seasonality;
+    const maxIdx = seas.values.indexOf(Math.max(...seas.values));
+    const so = baseOptions();
+    upsert('season', 'seasonChart', {
+      type: 'bar',
+      data: { labels: seas.labels, datasets: [{ label: 'Avg sales', data: seas.values, borderRadius: 8, borderSkipped: false,
+        backgroundColor: seas.values.map((_, i) => i === maxIdx ? cyan : withAlpha(accent, .65)) }] },
+      options: so
+    });
+
+    const yr = data.yearly, yo = baseOptions();
+    yo.plugins.legend = { display: true, labels: { color: css('--muted'), usePointStyle: true, boxWidth: 8 } };
+    upsert('year', 'yearChart', {
+      type: 'bar',
+      data: { labels: yr.years, datasets: [
+        { label: 'Sales', data: yr.sales, backgroundColor: accent, borderRadius: 8, borderSkipped: false },
+        { label: 'Profit', data: yr.profit, backgroundColor: cyan, borderRadius: 8, borderSkipped: false }
+      ] },
+      options: yo
+    });
+
+    const rg = data.regions;
+    upsert('region', 'regionChart', {
+      type: 'doughnut',
+      data: { labels: rg.labels, datasets: [{ data: rg.values, backgroundColor: palette, borderColor: css('--panel-solid'), borderWidth: 3, hoverOffset: 8 }] },
+      options: {
+        responsive: true, maintainAspectRatio: false, cutout: '66%',
+        plugins: {
+          legend: { position: 'right', labels: { color: css('--muted'), usePointStyle: true, boxWidth: 8, padding: 14 } },
+          tooltip: { backgroundColor: css('--panel-solid'), titleColor: css('--text'), bodyColor: css('--text'), borderColor: css('--border'), borderWidth: 1, padding: 12, cornerRadius: 10,
+            callbacks: { label: (c) => ` ${c.label}: ${fmtMoney(c.parsed)}` } }
+        }
+      }
+    });
+
+    const sc = data.subcats, sco = baseOptions();
+    sco.indexAxis = 'y'; sco.interaction = { mode: 'nearest', intersect: true };
+    sco.scales = {
+      x: { grid: { color: css('--grid') }, ticks: { color: css('--muted'), callback: (v) => fmtCompact(v) }, border: { display: false }, beginAtZero: true },
+      y: { grid: { display: false }, ticks: { color: css('--text') }, border: { display: false } }
+    };
+    sco.plugins.tooltip.callbacks.label = (c) => ` ${fmtMoney(c.parsed.x)}`;
+    upsert('sub', 'subChart', {
+      type: 'bar',
+      data: { labels: sc.labels, datasets: [{ data: sc.values, borderRadius: 8, borderSkipped: false,
+        backgroundColor: sc.values.map((_, i) => palette[i % palette.length]) }] },
+      options: sco
+    });
+  }
+
+  function renderTables() {
+    $('metricsBody').innerHTML = data.metrics.map(m => {
+      const tags = [];
+      if (m.model === data.selected_model) tags.push('<span class="tag sel">Selected</span>');
+      if (m.model === data.best_model) tags.push('<span class="tag best">Best</span>');
+      if (m.baseline) tags.push('<span class="tag base">Baseline</span>');
+      return `<tr class="${m.model === data.selected_model ? 'selected' : ''}">
+        <td>${m.model.replace(' (baseline)', '')}${tags.join('')}</td>
+        <td>${fmtMoney(m.mae)}</td><td>${fmtMoney(m.rmse)}</td>
+        <td>${m.mape == null ? '–' : m.mape.toFixed(1) + '%'}</td><td>${m.r2 == null ? '–' : m.r2.toFixed(2)}</td></tr>`;
+    }).join('');
+
+    const f = data.forecast;
+    $('forecastBody').innerHTML = f.labels.map((l, i) => `
+      <tr><td>${monthLabel(l)}</td><td><b>${fmtMoney(f.values[i])}</b></td>
+      <td>${fmtMoney(f.lower[i])}</td><td>${fmtMoney(f.upper[i])}</td></tr>`).join('');
+  }
+
+  function renderCharts() { renderMain(); renderSecondary(); }
+  function renderAll() { renderKpis(); renderCharts(); renderTables(); }
+
+  /* ---------------- data loading ---------------- */
+  async function load() {
+    const id = ++reqId;
+    const params = new URLSearchParams({
+      region: $('region').value, segment: $('segment').value,
+      model: $('model').value, horizon: $('horizon').value
+    });
+    $('app').classList.add('loading');
+    try {
+      const res = await fetch('/api/dashboard?' + params);
+      const json = await res.json();
+      if (id !== reqId) return;
+      if (!res.ok) throw new Error(json.error || 'Request failed');
+      data = json;
+      $('toast').classList.remove('show');
+      renderAll();
+    } catch (err) {
+      if (id !== reqId) return;
+      $('toast').textContent = err.message;
+      $('toast').classList.add('show');
+    } finally {
+      if (id === reqId) $('app').classList.remove('loading');
+    }
+  }
+
+  ['region', 'segment', 'model'].forEach(id => $(id).addEventListener('change', load));
+  let t;
+  $('horizon').addEventListener('input', () => {
+    $('horizonVal').textContent = $('horizon').value;
+    clearTimeout(t); t = setTimeout(load, 250);
+  });
+
+  $('csvBtn').addEventListener('click', () => {
+    if (!data) return;
+    const f = data.forecast;
+    const rows = ['month,forecast,lower_95,upper_95', ...f.labels.map((l, i) => `${l},${f.values[i]},${f.lower[i]},${f.upper[i]}`)];
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([rows.join('\n')], { type: 'text/csv' }));
+    a.download = 'sales_forecast.csv';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  });
+
+  load();
+})();
+</script>
+</body>
+</html>
