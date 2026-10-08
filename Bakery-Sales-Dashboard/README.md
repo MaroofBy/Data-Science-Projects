@@ -3,6 +3,8 @@
 ## 📌 Project Overview
 This is an end-to-end data analytics project that transforms raw retail transaction logs into a fully interactive business intelligence dashboard. Built with Python and Streamlit, this project demonstrates data cleaning, feature engineering, and data visualization techniques to track revenue, optimize operations, and monitor customer churn.
 
+🔗 Live demo: https://bakery-sales-dashboard.onrender.com
+
 ## 🚀 Key Features
 *   **Sales & Revenue Tracking:** Calculates total revenue, transaction counts, and identifies bestselling items dynamically based on date filters.
 *   **Customer Churn Analysis:** Simulates a loyalty customer base to calculate retail churn rates (defined as customers who haven't made a purchase in 30+ days).
