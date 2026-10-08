@@ -1,1 +1,515 @@
-Developed an interactive Power BI dashboard to analyze data job-market trends, including job demand, salaries, locations, experience levels, and other key hiring insights using data transformation, DAX, and interactive visualizations.
+# 📊 Data Jobs Dashboard
+
+An interactive **Power BI dashboard for analyzing the data-job market**, focusing on job demand, salaries, job trends, work-from-home opportunities, degree requirements, benefits, job platforms, employment types, and geographic distribution.
+
+The dashboard allows users to explore the job market at a high level and then **drill through into individual job titles** for a more detailed analysis.
+
+---
+
+## ✨ Highlights
+
+- 📈 Analyze **data-job demand and posting trends**
+- 💰 Compare **median yearly and hourly salaries**
+- ⭐ Analyze **average job ratings**
+- 🔎 Filter the dashboard by **job title**
+- 🏠 Compare **work-from-home opportunities**
+- 🎓 Analyze whether job postings mention a **degree requirement**
+- 🏥 Explore **health insurance availability**
+- 🌐 Compare job postings across **job platforms**
+- 💼 Analyze different **employment types**
+- 🌍 Explore job demand and salaries by **country**
+- 🔄 Drill through from the main dashboard into a **specific job title**
+
+---
+
+## 🖥️ Dashboard Pages
+
+### 1. 📊 Data Jobs Dashboard
+
+The main dashboard provides a high-level overview of the data-job market.
+
+#### Key KPIs
+
+The dashboard displays:
+
+| KPI | Description |
+|---|---|
+| **Job Count** | Total number of job postings |
+| **Median Yearly Salary** | Median annual salary across job postings |
+| **Median Hourly Salary** | Median hourly salary |
+| **Average Job Rating** | Average rating associated with job postings |
+
+A **Job Title slicer** allows the user to filter the dashboard and investigate specific roles.
+
+---
+
+### 📈 Job Market Overview
+
+The dashboard compares different job titles based on:
+
+- Number of job postings
+- Median yearly salary
+- Median hourly salary
+
+A **scatter chart** is used to visualize the relationship between job demand and compensation.
+
+This makes it easier to identify roles that combine:
+
+- High job demand
+- High salaries
+- Lower or higher compensation relative to other roles
+
+---
+
+### 📊 Job Title Comparison
+
+A bar chart compares the number of postings across different job titles.
+
+This provides a quick view of which data-related roles have the greatest demand in the dataset.
+
+---
+
+### 📅 Job Posting Trends
+
+A time-series visualization tracks job posting volume over time.
+
+The dashboard supports date-based analysis across:
+
+```text
+Year
+ └── Quarter
+      └── Month
+           └── Day
+```
+
+This makes it possible to investigate changes in job demand over time.
+
+---
+
+### 📋 Job Market Table
+
+The dashboard also provides a detailed table containing:
+
+- Job Title
+- Salary Median
+- Hourly Median
+- Job Count
+- Quarterly job trends
+
+The table includes **sparklines** to provide a compact view of job-posting trends for each role.
+
+---
+
+## 🔎 Job Title Drill Through
+
+The second page provides a detailed analysis for a selected job title.
+
+Users can select a job title from the main dashboard and drill through to a dedicated analysis page.
+
+For example:
+
+```text
+Data Jobs Dashboard
+        ↓
+Select Job Title
+        ↓
+Drill Through
+        ↓
+Detailed Job Title Analysis
+```
+
+---
+
+## 💰 Salary Analysis
+
+The drill-through page provides detailed salary statistics for the selected job title.
+
+### Yearly Salary
+
+The dashboard analyzes:
+
+- Minimum yearly salary
+- Maximum yearly salary
+- Average yearly salary
+- Median yearly salary
+
+### Hourly Salary
+
+It also provides:
+
+- Minimum hourly salary
+- Maximum hourly salary
+- Average hourly salary
+- Median hourly salary
+
+This gives a more complete picture of compensation rather than relying on a single salary metric.
+
+---
+
+## 🏠 Work From Home
+
+A donut chart shows the distribution of job postings that offer or mention:
+
+**Work From Home**
+
+This helps evaluate the availability of remote opportunities for a selected job title.
+
+---
+
+## 🎓 Degree Requirements
+
+The dashboard analyzes whether job postings mention a **degree requirement**.
+
+This is useful for understanding how educational requirements vary between different data-related careers.
+
+---
+
+## 🏥 Health Insurance
+
+The dashboard also analyzes the availability/mention of **health insurance** in job postings.
+
+This provides an additional perspective on the benefits associated with different roles.
+
+---
+
+## 🌐 Job Platforms
+
+A bar chart compares job postings by the platform through which they were posted.
+
+This helps identify the major sources of job opportunities for a selected role.
+
+---
+
+## 💼 Job Type
+
+The dashboard breaks down jobs by employment type, including:
+
+- Full-time
+- Part-time
+- Internship
+- Contractor
+- Temp work
+
+A treemap is used to visualize the percentage distribution of these job types.
+
+---
+
+## 🌍 Geographic Analysis
+
+The drill-through page includes a geographic map showing job opportunities by **country**.
+
+The map provides:
+
+- Country
+- Job Count
+- Median Yearly Salary
+
+This makes it possible to investigate both **where jobs are concentrated** and **how compensation varies geographically**.
+
+---
+
+## 🧠 Dashboard Design
+
+The dashboard follows a two-level analytical structure:
+
+```text
+                    DATA JOBS MARKET
+                           │
+             ┌─────────────┴─────────────┐
+             │                           │
+       Market Overview             Job Title Analysis
+             │                           │
+       ┌─────┼─────┐             ┌───────┼────────┐
+       │     │     │             │       │        │
+     Demand Salary Trends       Salary Benefits Geography
+       │     │     │             │       │        │
+       └─────┴─────┘             └───────┴────────┘
+```
+
+The goal is to allow users to move from a **general market overview** to a **specific job-level analysis**.
+
+---
+
+## 🗂️ Dashboard Structure
+
+```text
+Data Jobs Dashboard
+│
+├── 📊 Main Dashboard
+│   ├── Job Count
+│   ├── Median Yearly Salary
+│   ├── Median Hourly Salary
+│   ├── Average Job Rating
+│   ├── Job Title Filter
+│   ├── Salary vs Job Demand
+│   ├── Job Title Comparison
+│   ├── Job Posting Trends
+│   └── Job Market Table
+│
+└── 🔎 Job Title Drill Through
+    ├── Work From Home
+    ├── Salary Analysis
+    ├── Degree Requirement
+    ├── Health Insurance
+    ├── Job Platform
+    ├── Employment Type
+    └── Country Analysis
+```
+
+---
+
+## 🛠️ Tech Stack
+
+**Data Visualization**
+
+- Microsoft Power BI
+- Power BI Desktop
+
+**Data Analysis**
+
+- Power Query
+- DAX
+- Data Modeling
+
+**Visualization**
+
+- Bar Charts
+- Line Charts
+- Scatter Charts
+- Donut Charts
+- Treemap
+- Azure Maps
+- KPI Cards
+- Tables
+- Sparklines
+- Slicers
+- Drill Through
+
+---
+
+## 📐 Data Model & Analysis
+
+The primary dataset used by the dashboard is represented by the:
+
+```text
+job_postings_flat
+```
+
+dataset/table.
+
+Important fields used throughout the dashboard include:
+
+```text
+job_title_short
+job_posted_date
+salary_year_avg
+salary_hour_avg
+job_country
+job_schedule_type
+job_via
+job_health_insurance
+```
+
+These fields are used to analyze:
+
+- Job demand
+- Compensation
+- Posting trends
+- Geography
+- Employment type
+- Benefits
+- Job platforms
+- Remote-work opportunities
+
+---
+
+## 📊 Key Analytical Questions
+
+The dashboard is designed to answer questions such as:
+
+### Job Demand
+
+- Which data jobs have the most openings?
+- How does job demand vary between roles?
+- How has job demand changed over time?
+
+### Salary
+
+- Which roles have the highest median salaries?
+- How do yearly and hourly salaries compare?
+- What are the minimum, maximum, average, and median salaries for a role?
+
+### Career Requirements
+
+- Which jobs mention degree requirements?
+- Which roles offer work-from-home opportunities?
+- Which roles mention health insurance?
+
+### Employment
+
+- Are most opportunities full-time?
+- How common are internships and contract positions?
+- Which platforms contain the most job postings?
+
+### Geography
+
+- Which countries have the most opportunities?
+- How does median salary vary by country?
+
+---
+
+## 🔍 Example Analysis Workflow
+
+A typical analysis can follow this process:
+
+```text
+Open Dashboard
+      ↓
+Review Overall Job Market
+      ↓
+Compare Job Titles
+      ↓
+Select a Job Title
+      ↓
+Drill Through
+      ↓
+Analyze Salary
+      ↓
+Analyze Remote Opportunities
+      ↓
+Check Degree Requirements
+      ↓
+Check Benefits
+      ↓
+Analyze Platforms & Job Types
+      ↓
+Compare Countries
+```
+
+---
+
+## 🚀 How to Use
+
+### Requirements
+
+You need:
+
+- Microsoft Power BI Desktop
+- The dashboard `.pbix` file
+- Access to the underlying dataset if the data source needs to be refreshed
+
+### Open the Dashboard
+
+1. Download or clone this repository.
+2. Open:
+
+```text
+Data Jobs Dashboard.pbix
+```
+
+3. Open the file using **Power BI Desktop**.
+4. Use the **Job Title slicer** to filter the dashboard.
+5. Select a job title and use the **drill-through functionality** to open the detailed analysis.
+
+---
+
+## 📌 Important Dashboard Features
+
+### Interactive Filtering
+
+The dashboard is not a static report.
+
+Users can interact with the data through:
+
+- Job title filtering
+- Drill-through navigation
+- Interactive charts
+- Geographic analysis
+- Cross-filtering between visuals
+
+### Drill Through
+
+The drill-through page is particularly useful because it changes the analysis from:
+
+> **"What is happening in the overall data-job market?"**
+
+to:
+
+> **"What does the market look like for this specific job title?"**
+
+---
+
+## 📈 Skills Demonstrated
+
+This project demonstrates practical experience with:
+
+- Power BI dashboard development
+- Data visualization
+- Data modeling
+- Power Query
+- DAX
+- KPI development
+- Interactive filtering
+- Drill-through reports
+- Time-series analysis
+- Salary analysis
+- Geographic analysis
+- Business intelligence
+- Data storytelling
+- Dashboard UX design
+
+---
+
+## 🎯 Project Purpose
+
+The purpose of this project is to transform raw job-posting data into an **interactive business intelligence dashboard** that can help users understand the data-job market.
+
+Rather than looking at individual job postings separately, the dashboard aggregates the data into meaningful dimensions such as:
+
+```text
+Demand
+Salary
+Time
+Location
+Benefits
+Education
+Employment Type
+Job Platform
+```
+
+This makes it easier to identify patterns and compare career opportunities across different data roles.
+
+---
+
+## 🔮 Future Improvements
+
+Potential improvements include:
+
+- Add more advanced DAX measures
+- Add salary percentile analysis
+- Add year-over-year job growth
+- Add salary growth trends
+- Add a dedicated remote-job analysis page
+- Add company-level analysis
+- Add industry-level analysis
+- Add experience-level analysis
+- Add more geographic filters
+- Add bookmark-based navigation
+- Add mobile-optimized dashboard layout
+- Publish the dashboard through Power BI Service
+
+---
+
+## 👤 Author
+
+**Farooqui Mohd Maroof**
+
+GitHub: [@MaroofBy](https://github.com/MaroofBy)
+
+---
+
+## 📌 Project Status
+
+**Completed — Power BI Data Analytics & Business Intelligence Project**
+
+The dashboard provides an interactive analysis of the data-job market using Power BI, combining job demand, salary, trends, benefits, employment type, job platforms, and geographic information into a two-page analytical experience.
